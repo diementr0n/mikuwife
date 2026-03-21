@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ЗАГС Хацунэ Мику — Официальный реестр</title>
+    <title>ЗАГС Хацунэ Мику</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -12,111 +12,63 @@
             --glass-bg: rgba(255, 255, 255, 0.45);
             --glass-blur: blur(12px);
             --glass-border: rgba(255, 255, 255, 0.3);
+            --error-red: #ff4444;
         }
 
         body {
             background: linear-gradient(135deg, #e0f7f6 0%, #ffffff 100%);
-            color: #333;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 40px 20px;
-            overflow-x: hidden;
+            color: #333; font-family: 'Segoe UI', sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; margin: 0; padding: 40px 20px; overflow-x: hidden;
         }
 
-        /* ПИКСЕЛЬНЫЕ СЕРДЦА */
-        .hearts-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
+        .hearts-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
         .heart {
-            position: absolute;
-            width: 15px; height: 15px;
-            background: rgba(57, 197, 187, 0.2);
-            filter: blur(1px);
-            clip-path: polygon(50% 15%, 70% 0, 100% 20%, 100% 60%, 50% 100%, 0% 60%, 0% 20%, 30% 0);
+            position: absolute; width: 15px; height: 15px; background: rgba(57, 197, 187, 0.2);
+            filter: blur(1px); clip-path: polygon(50% 15%, 70% 0, 100% 20%, 100% 60%, 50% 100%, 0% 60%, 0% 20%, 30% 0);
             animation: fall 20s linear infinite;
         }
         @keyframes fall {
             0% { transform: translateY(-10%) rotate(0deg); opacity: 0; }
             10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
             100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
         }
 
-        /* ГЛЭЙССМОРФИЗМ */
         .container {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 550px;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 25px;
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 20px; padding: 30px; max-width: 550px; width: 100%; text-align: center; margin-bottom: 25px; box-sizing: border-box;
         }
 
-        h1 { color: var(--miku-dark); margin-bottom: 5px; }
+        h1 { color: var(--miku-dark); margin: 0 0 5px 0; }
         p.subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
 
         input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid var(--glass-border);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.7);
-            box-sizing: border-box;
-            font-size: 16px;
+            width: 100%; padding: 12px; margin: 10px 0; border: 2px solid var(--glass-border); border-radius: 10px;
+            background: rgba(255, 255, 255, 0.7); font-size: 16px; outline: none; box-sizing: border-box;
         }
-        input:focus { border-color: var(--miku-color); outline: none; }
+        input:focus { border-color: var(--miku-color); }
 
         button {
-            background: var(--miku-color);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(57, 197, 187, 0.3);
+            background: var(--miku-color); color: white; border: none; padding: 15px; border-radius: 10px;
+            width: 100%; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s;
         }
-        button:hover { background: var(--miku-dark); transform: translateY(-2px); }
-        button:disabled { background: #ccc; transform: none; box-shadow: none; }
+        button:hover { background: var(--miku-dark); transform: translateY(-1px); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* ВЕРИФИКАЦИЯ */
-        #verifySection {
-            background: rgba(255, 165, 0, 0.15);
-            border: 2px dashed #ff9800;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-
-        /* СТАТИСТИКА */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-card { background: rgba(255,255,255,0.3); padding: 10px; border-radius: 10px; }
         .stat-card span { display: block; font-size: 22px; font-weight: bold; color: var(--miku-dark); }
-        .stat-card label { font-size: 12px; color: #555; }
+        .chart-wrapper { height: 250px; width: 100%; margin-top: 15px; }
 
-        .chart-wrapper { height: 280px; width: 100%; margin-top: 15px; }
-#statusMsg { margin-top: 15px; font-weight: bold; min-height: 20px; }
+        #certificate { border: 4px double var(--miku-color); padding: 20px; border-radius: 10px; background: rgba(255,255,255,0.6); margin-top: 20px; }
+        video { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+
+        .footer-text { margin-top: auto; padding: 20px; font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);
+            z-index: 1000; display: none; justify-content: center; align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -124,41 +76,67 @@
 <div class="hearts-container" id="hearts"></div>
 
 <div class="container" id="mainCard">
-    <h1>Брак с Хатсунэ Мику</h1>
-    <p class="subtitle">Ваш шанс пожениться на Мику! Но от вас требуется ежедневная активность!</p>
-
+    <h1>Отдел регистрации браков с Мику</h1>
+    <p class="subtitle">Ваш лучший шанс пожениться на Мику. Верность проверяется каждые 24 часа. У вас есть только одно право на ошибку.</p>
+    <p> Особая благодарность за идею: <a href="https://t.me/MikuTondeIko">Микуняшечкам</a></p>
     <form id="marryForm">
-        <input type="text" id="username" placeholder="@username (только латиница)" required 
-               pattern="^@[A-Za-z0-9_]+$" title="Ник должен начинаться с @ и быть на латинице">
+        <input type="text" id="username" placeholder="@username" required pattern="^@[A-Za-z0-9_]+$">
         <button type="submit" id="regBtn">Заключить священный брак</button>
     </form>
 
-    <div id="loginArea" style="margin-top: 20px; font-size: 13px; color: #666;">
-        <p>Уже в браке? Восстановите доступ:</p>
+    <div id="loginArea" style="margin-top: 20px;">
+        <p style="font-size: 12px; color: #666;">Уже женаты или разведены (1 шанс)?</p>
         <div style="display:flex; gap:5px;">
             <input type="text" id="loginNick" placeholder="@username" style="margin:0; flex:3;">
-            <button id="loginBtn" style="flex:1; padding:5px; background:#888;">Войти</button>
+            <button id="loginBtn" style="flex:1; background:#888;">Вход</button>
         </div>
     </div>
 
-    <div id="verifySection" style="display: none;">
-        <h3 style="color: #e65100; margin:0;">Проверка чувств!</h3>
-        <p style="font-size: 13px;">Прошло более 12 часов. Подтвердите, что вы всё ещё любите Мику.</p>
-        <button id="verifyBtn" style="background: #ef6c00;">ПОДТВЕРЖДАЮ ЛЮБОВЬ</button>
+    <div id="verifySection" style="display: none; margin-top: 20px; border: 2px dashed orange; padding: 15px; border-radius: 12px;">
+        <p style="color: #e65100; font-weight: bold;">ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ!</p>
+        <button id="verifyBtn" style="background: #ef6c00;">Я ЛЮБЛЮ МИКУШУ!</button>
     </div>
 
-    <div id="statusMsg"></div>
+    <div id="statusMsg" style="margin-top: 15px; font-weight: bold;"></div>
+
+    <div id="mediaArea" style="display: none; margin-top: 20px;">
+        <div id="videoBox" style="display: none;">
+            <video id="mikuVideo" controls><source src="miku_wedding.mp4" type="video/mp4"></video>
+        </div>
+        <div id="certificate" style="display: none;">
+            <h3 style="color: var(--miku-color);">Свидетельство о браке</h3>
+            <p>Законный муж:</p>
+            <h2 id="certUser" style="color: var(--miku-dark); margin: 5px 0;"></h2>
+            <p>в вечном союзе с <b>Hatsune Miku</b></p>
+        </div>
+    </div>
 </div>
 
 <div class="container">
-    <h3>Мировая статистика</h3>
     <div class="stats-grid">
         <div class="stat-card"><span id="sToday">0</span><label>Сегодня</label></div>
-        <div class="stat-card"><span id="sTotal">0</span><label>Всего мужей</label></div>
-        <div class="stat-card"><span id="sDivorced" style="color:#c62828;">0</span><label>Разводов</label></div>
+        <div class="stat-card"><span id="sTotal">0</span><label>Мужей</label></div>
+        <div class="stat-card"><span id="sDiv" style="color:red;">0</span><label>Разводов</label></div>
     </div>
-    <div class="chart-wrapper">
-        <canvas id="mikuChart"></canvas>
+    <div class="chart-wrapper"><canvas id="mikuChart"></canvas></div>
+</div>
+
+<div class="footer-text" id="openModalBtn">Отказ от ответственности и правила</div>
+
+<div class="modal-overlay" id="disclaimerModal">
+    <div class="container" style="max-width:400px;">
+        <h3>Правила Союза</h3>
+        <p style="font-size: 13px; text-align: left;">
+            - Проект являет собой шуточный фанатский проект и не претендует на права на персонажей. 
+            - Хатсунэ Мику принадлежит Crypton Future Media. 
+            - На сайте используется Google Firebase.
+            - Проверка статуса: 1 раз в 24 часа.<br>
+            - Развод: автоматический при пропуске.<br>
+            - Восстановление: <b>строго 1 раз</b>.<br>
+            - Если лимит исчерпан, ник блокируется навсегда.
+            - Ссылка на статистику: <a href="https://docs.google.com/spreadsheets/d/1fpzeVkY4wwapDAVzXZcG5dvHRKydlevnHNBYopovTSM">Google Sheets</a>
+        </p>
+        <button id="closeModalBtn" style="background: #555;">Принимаю</button>
     </div>
 </div>
 
@@ -166,9 +144,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // === ВСТАВЬ СВОИ ДАННЫЕ FIREBASE ===
-    const firebaseConfig = {
-        apiKey: "AIzaSyDQVTXL_N9cqZAA5dJ-y_FMhporg5sCwLE",
+    const firebaseConfig = {       
+    apiKey: "AIzaSyDQVTXL_N9cqZAA5dJ-y_FMhporg5sCwLE",
         authDomain: "mikuwife.firebaseapp.com",
         projectId: "mikuwife",
         storageBucket: "mikuwife.firebasestorage.app",
@@ -180,21 +157,27 @@
     const db = getFirestore(app);
     let myChart = null;
 
-    // ПРОД-ТАЙМИНГИ (12ч / 24ч)
-    const TIME_VERIFY = 12 * 60 * 60 * 1000; 
-    const TIME_DIVORCE = 24 * 60 * 60 * 1000;
+    const TIME_VERIFY = 1 * 60 * 1000; 
+    const TIME_DIVORCE = 1.5 * 60 * 1000;
 
-    // ГЕНЕРАЦИЯ СЕРДЕЧЕК
+    // СЕРДЕЧКИ
     const hContainer = document.getElementById('hearts');
     for(let i=0; i<25; i++) {
         const h = document.createElement('div');
-        h.className = 'heart';
-        h.style.left = Math.random() * 100 + 'vw';
-        h.style.animationDelay = Math.random() * 20 + 's';
-        hContainer.appendChild(h);
+        h.className = 'heart'; h.style.left = Math.random() * 100 + 'vw';
+        h.style.animationDelay = Math.random() * 20 + 's'; hContainer.appendChild(h);
     }
 
-    // ЛОГИКА ИНТЕРФЕЙСА
+    // MODAL
+    document.getElementById('openModalBtn').onclick = () => document.getElementById('disclaimerModal').style.display = 'flex';
+    document.getElementById('closeModalBtn').onclick = () => document.getElementById('disclaimerModal').style.display = 'none';
+
+    function showCert(user) {
+        document.getElementById('videoBox').style.display = 'none';
+        document.getElementById('certificate').style.display = 'block';
+        document.getElementById('certUser').textContent = user;
+    }
+
     function updateUI() {
         const user = localStorage.getItem('miku_user');
         const lastV = parseInt(localStorage.getItem('miku_verified') || "0");
@@ -205,113 +188,135 @@
         if (user) {
             document.getElementById('marryForm').style.display = 'none';
             document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('mediaArea').style.display = 'block';
+            if (document.getElementById('videoBox').style.display === 'none') showCert(user);
             
             if (now - lastV > TIME_VERIFY) {
                 vSec.style.display = 'block';
-                msg.textContent = "Ваш брак под угрозой аннулирования!";
+                msg.textContent = "Мику ждет подтверждения!";
                 msg.style.color = "#ef6c00";
             } else {
                 vSec.style.display = 'none';
-                msg.textContent = "Будьте счастливы в браке с Мику!";
+                msg.textContent = `Вы в браке, ${user} 🩵`;
                 msg.style.color = "var(--miku-dark)";
             }
         }
     }
-// СИНХРОНИЗАЦИЯ И ЛЕНИВЫЕ РАЗВОДЫ
+
     async function sync() {
         try {
             const q = query(collection(db, "marriages"), orderBy("created", "asc"));
             const snap = await getDocs(q);
             const now = Date.now();
             const today = new Date().toLocaleDateString('ru-RU');
-
-            let countToday = 0, countTotal = 0, countDivorced = 0;
-            const chartData = {};
+            let cT = 0, cAll = 0, cD = 0;
+            const cData = {};
 
             for (const d of snap.docs) {
                 const data = d.data();
-                let status = data.status;
+                let s = data.status;
 
-                // Механика автоматического развода
-                if (status === 'married' && (now - data.last_verified > TIME_DIVORCE)) {
+                if (s === 'married' && (now - data.last_verified > TIME_DIVORCE)) {
                     await updateDoc(doc(db, "marriages", d.id), { status: 'divorced' });
-                    status = 'divorced';
+                    s = 'divorced';
                     if (data.username === localStorage.getItem('miku_user')) {
-                        localStorage.clear();
-                        location.reload();
+                        localStorage.clear(); location.reload();
                     }
                 }
 
-                const date = new Date(data.created).toLocaleDateString('ru-RU');
-                if (status === 'married') {
-                    countTotal++;
-                    if (date === today) countToday++;
-                    chartData[date] = (chartData[date] || 0) + 1;
-                } else {
-                    countDivorced++;
-                }
+                const day = new Date(data.created).toLocaleDateString('ru-RU');
+                if (s === 'married') {
+                    cAll++; if (day === today) cT++;
+                    cData[day] = (cData[day] || 0) + 1;
+                } else { cD++; }
             }
-
-            document.getElementById('sToday').textContent = countToday;
-            document.getElementById('sTotal').textContent = countTotal;
-            document.getElementById('sDivorced').textContent = countDivorced;
-            renderChart(chartData);
-        } catch (e) { console.error("Sync Error:", e); }
+            document.getElementById('sToday').textContent = cT;
+            document.getElementById('sTotal').textContent = cAll;
+            document.getElementById('sDiv').textContent = cD;
+            renderChart(cData);
+        } catch (e) { console.error(e); }
     }
 
     function renderChart(data) {
-        const labels = Object.keys(data);
-        const values = labels.map(l => data[l]);
+        const labels = Object.keys(data); const values = labels.map(l => data[l]);
         if (myChart) myChart.destroy();
         myChart = new Chart(document.getElementById('mikuChart'), {
             type: 'line',
-            data: { labels, datasets: [{ 
-                label: 'Активные браки', 
-                data: values, 
-                borderColor: '#39C5BB', 
-                backgroundColor: 'rgba(57,197,187,0.1)',
-                fill: true,
-                tension: 0.4
-            }]},
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: {stepSize: 1} } } }
+            data: { labels, datasets: [{ label: 'Браки', data: values, borderColor: '#39C5BB', tension: 0.4, fill: true, backgroundColor: 'rgba(57,197,187,0.1)' }] },
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
-    // СОБЫТИЯ
-    document.getElementById('marryForm').addEventListener('submit', async (e) => {
+    // РЕГИСТРАЦИЯ С БЛОКОМ ПОВТОРОВ
+    document.getElementById('marryForm').onsubmit = async (e) => {
         e.preventDefault();
         const u = document.getElementById('username').value.trim();
-        const btn = document.getElementById('regBtn');
-        btn.disabled = true;
-
-        const q = query(collection(db, "marriages"), where("username", "==", u), where("status", "==", "married"));
+        
+        // ПРОВЕРЯЕМ НИК ВООБЩЕ ВЕЗДЕ
+        const q = query(collection(db, "marriages"), where("username", "==", u));
         const snap = await getDocs(q);
         
         if (!snap.empty) {
-            alert("Этот ник уже занят!");
-            btn.disabled = false;
+            const data = snap.docs[0].data();
+            if (data.status === 'married') {
+                alert("Ник уже занят активным мужем!");
+            } else if (data.restorations >= 1) {
+                alert("Этот ник аннулирован навсегда из-за нарушения верности.");
+            } else {
+                alert("Этот ник уже был зарегистрирован. Используйте 'Вход' для восстановления.");
+            }
             return;
         }
 
         const now = Date.now();
-        await addDoc(collection(db, "marriages"), { username: u, created: now, last_verified: now, status: 'married' });
+        await addDoc(collection(db, "marriages"), { 
+            username: u, created: now, last_verified: now, status: 'married', restorations: 0 
+        });
         localStorage.setItem('miku_user', u);
         localStorage.setItem('miku_verified', now);
-        updateUI();
-        sync();
-    });
+        
+        document.getElementById('marryForm').style.display = 'none';
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('mediaArea').style.display = 'block';
+        document.getElementById('videoBox').style.display = 'block';
+        const v = document.getElementById('mikuVideo');
+        v.play().catch(() => showCert(u));
+        v.onended = () => showCert(u);
+        updateUI(); sync();
+    };
 
-    document.getElementById('loginBtn').addEventListener('click', async () => {
+    // ВХОД / ВОССТАНОВЛЕНИЕ (1 шанс)
+    document.getElementById('loginBtn').onclick = async () => {
         const u = document.getElementById('loginNick').value.trim();
-        const q = query(collection(db, "marriages"), where("username", "==", u), where("status", "==", "married"));
+        const q = query(collection(db, "marriages"), where("username", "==", u));
         const snap = await getDocs(q);
-        if (!snap.empty) {
+
+        if (snap.empty) { alert("Ник не зарегистрирован!"); return; }
+
+        const userDoc = snap.docs[0];
+        const data = userDoc.data();
+
+        if (data.status === 'married') {
             localStorage.setItem('miku_user', u);
-            localStorage.setItem('miku_verified', snap.docs[0].data().last_verified);
+            localStorage.setItem('miku_verified', data.last_verified);
             updateUI();
-        } else alert("Брак не найден или аннулирован.");
-    });
-document.getElementById('verifyBtn').addEventListener('click', async () => {
+        } else {
+            if ((data.restorations || 0) < 1) {
+                const now = Date.now();
+                await updateDoc(doc(db, "marriages", userDoc.id), { 
+                    status: 'married', last_verified: now, restorations: 1 
+                });
+                localStorage.setItem('miku_user', u);
+                localStorage.setItem('miku_verified', now);
+                alert("Шанс использован. Теперь будьте внимательны!");
+                updateUI(); sync();
+            } else {
+                alert("Лимит восстановлений исчерпан. Ник заблокирован навсегда.");
+            }
+        }
+    };
+
+    document.getElementById('verifyBtn').onclick = async () => {
         const u = localStorage.getItem('miku_user');
         const q = query(collection(db, "marriages"), where("username", "==", u), where("status", "==", "married"));
         const snap = await getDocs(q);
@@ -319,28 +324,12 @@ document.getElementById('verifyBtn').addEventListener('click', async () => {
             const now = Date.now();
             await updateDoc(doc(db, "marriages", snap.docs[0].id), { last_verified: now });
             localStorage.setItem('miku_verified', now);
-            updateUI();
-            sync();
+            updateUI(); sync();
         }
-    });
+    };
 
-    setInterval(updateUI, 10000); // Обновлять UI каждые 10 секунд
-    updateUI();
-    sync();
+    setInterval(updateUI, 10000);
+    updateUI(); sync();
 </script>
-</body>
-<div id="disclaimerModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(5px);">
-    <div class="container" style="margin: 10% auto; max-width: 400px; text-align: left; position: relative;">
-        <span id="closeModal" style="position: absolute; right: 20px; top: 10px; font-size: 28px; cursor: pointer; color: var(--miku-color);">&times;</span>
-        <h3 style="color: var(--miku-color);">Отказ от ответственности</h3>
-        <p style="font-size: 14px; line-height: 1.6;">
-            Проект являет собой шуточный фанатский проект и не претендует на права на персонажей. Хатсунэ Мику принадлежит Crypton Future Media. На сайте используется Google Firebase.
-            Администрация не несет ответственности за то, что вы поссоритесь с Мику и она вас бросит, за бытовые конфликты или жалобы соседей на то, что она не даёт спать. 
-            Статистика является общедоступной и может быть изучена <a href="https://docs.google.com/spreadsheets/d/1fpzeVkY4wwapDAVzXZcG5dvHRKydlevnHNBYopovTSM">здесь</a>.
-            В случае, если вы не согласны с публикацией вашего юзернейма, обратитесь к @dmtr0n в Telegram.
-        </p>
-        <button id="closeBtnModal">Понятно</button>
-    </div>
-</div>
 </body>
 </html>
