@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ЗАГС Хацунэ Мику</title>
+    <title>Микуша для Скуфа</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -12,7 +12,6 @@
             --glass-bg: rgba(255, 255, 255, 0.45);
             --glass-blur: blur(12px);
             --glass-border: rgba(255, 255, 255, 0.3);
-            --error-red: #ff4444;
         }
 
         body {
@@ -20,6 +19,7 @@
             color: #333; font-family: 'Segoe UI', sans-serif;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh; margin: 0; padding: 40px 20px; overflow-x: hidden;
+            user-select: none; /* Защита от выделения при активных кликах */
         }
 
         .hearts-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
@@ -65,10 +65,26 @@
         video { width: 100%; border-radius: 10px; margin-bottom: 10px; }
 
         .footer-text { margin-top: auto; padding: 20px; font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);
-            z-index: 1000; display: none; justify-content: center; align-items: center;
-        }
+        
+        /* МИНИ-ИГРЫ СТИЛИ */
+        #verifySection { border: 2px dashed var(--miku-color); padding: 20px; border-radius: 12px; background: rgba(57, 197, 187, 0.1); margin-top: 20px; position: relative; overflow: hidden; min-height: 120px; display: none; }
+        
+        .progress-container { width: 100%; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 10px; height: 20px; }
+        .progress-bar { height: 100%; background: var(--miku-color); width: 0%; transition: width 0.1s; }
+        
+        .pet-zone { cursor: grab; font-size: 40px; margin: 10px; display: inline-block; transition: 0.1s; }
+        .pet-zone:active { cursor: grabbing; transform: scale(1.1); }
+        
+        .candy-btn { font-size: 40px; background: none; border: none; box-shadow: none; padding: 0; width: auto; transition: 0.3s; cursor: pointer; }
+        .candy-btn:hover { transform: scale(1.2); background: none; }
+        .fly-up { animation: flyUp 1s forwards; }
+        @keyframes flyUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(0); opacity: 0; } }
+        
+        .leek-btn { font-size: 40px; background: none; border: none; box-shadow: none; width: auto; cursor: pointer; transition: 0.1s; }
+        .leek-btn:active { transform: rotate(20deg) scale(1.1); }
+        
+        .note { position: absolute; font-size: 25px; cursor: pointer; color: var(--miku-color); animation: floatNote 3s linear infinite; }
+        @keyframes floatNote { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.2); } 100% { transform: translateY(0) scale(1); } }
     </style>
 </head>
 <body>
@@ -76,9 +92,9 @@
 <div class="hearts-container" id="hearts"></div>
 
 <div class="container" id="mainCard">
-    <h1>Отдел регистрации браков с Мику</h1>
-    <p class="subtitle">Ваш лучший шанс пожениться на Мику. Верность проверяется каждые 24 часа. У вас есть только одно право на ошибку.</p>
-    <p> Особая благодарность за идею: <a href="https://t.me/MikuTondeIko">Микуняшечкам</a></p>
+    <h1>Микуша для Скуфа</h1>
+    <p class="subtitle">Ваш лучший шанс пожениться на Микуше, но готовьтесь дарить много внимания!</p>
+
     <form id="marryForm">
         <input type="text" id="username" placeholder="@username" required pattern="^@[A-Za-z0-9_]+$">
         <button type="submit" id="regBtn">Заключить священный брак</button>
@@ -92,11 +108,7 @@
         </div>
     </div>
 
-    <div id="verifySection" style="display: none; margin-top: 20px; border: 2px dashed orange; padding: 15px; border-radius: 12px;">
-        <p style="color: #e65100; font-weight: bold;">ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ!</p>
-        <button id="verifyBtn" style="background: #ef6c00;">Я ЛЮБЛЮ МИКУШУ!</button>
-    </div>
-
+    <div id="verifySection"></div>
     <div id="statusMsg" style="margin-top: 15px; font-weight: bold;"></div>
 
     <div id="mediaArea" style="display: none; margin-top: 20px;">
@@ -120,7 +132,6 @@
     </div>
     <div class="chart-wrapper"><canvas id="mikuChart"></canvas></div>
 </div>
-
 <div class="footer-text" id="openModalBtn">Отказ от ответственности и правила</div>
 
 <div class="modal-overlay" id="disclaimerModal">
@@ -144,7 +155,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, updateDoc, doc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    const firebaseConfig = {       
+    // Твои настройки
+ const firebaseConfig = {       
     apiKey: "AIzaSyDQVTXL_N9cqZAA5dJ-y_FMhporg5sCwLE",
         authDomain: "mikuwife.firebaseapp.com",
         projectId: "mikuwife",
@@ -153,24 +165,20 @@
         appId: "1:444633400835:web:70dcd0f9a320dfdc37b036"
     };
 
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     let myChart = null;
+    let isMinigameActive = false; // Защита от перерисовки
 
     const TIME_VERIFY = 12 * 60 * 60 *1000; 
     const TIME_DIVORCE = 24 * 60 * 60 * 1000;
 
-    // СЕРДЕЧКИ
     const hContainer = document.getElementById('hearts');
     for(let i=0; i<25; i++) {
-        const h = document.createElement('div');
-        h.className = 'heart'; h.style.left = Math.random() * 100 + 'vw';
+        const h = document.createElement('div'); h.className = 'heart'; h.style.left = Math.random() * 100 + 'vw';
         h.style.animationDelay = Math.random() * 20 + 's'; hContainer.appendChild(h);
     }
-
-    // MODAL
-    document.getElementById('openModalBtn').onclick = () => document.getElementById('disclaimerModal').style.display = 'flex';
-    document.getElementById('closeModalBtn').onclick = () => document.getElementById('disclaimerModal').style.display = 'none';
 
     function showCert(user) {
         document.getElementById('videoBox').style.display = 'none';
@@ -178,6 +186,172 @@
         document.getElementById('certUser').textContent = user;
     }
 
+    // === ЛОГИКА ВЕРИФИКАЦИИ (ОБНОВЛЕНИЕ БД) ===
+    async function completeVerification() {
+        const u = localStorage.getItem('miku_user');
+        const q = query(collection(db, "marriages"), where("username", "==", u), where("status", "==", "married"));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            const now = Date.now();
+            await updateDoc(doc(db, "marriages", snap.docs[0].id), { last_verified: now });
+            localStorage.setItem('miku_verified', now);
+            document.getElementById('verifySection').innerHTML = "<h3 style='color:var(--miku-dark);'>Мику счастлива! 🩵</h3>";
+            setTimeout(() => { isMinigameActive = false; updateUI(); sync(); }, 2000);
+        }
+    }
+
+    // === 5 АКТИВНОСТЕЙ ===
+    const games = [
+        function renderPet() {
+            const v = document.getElementById('verifySection');
+            // Увеличили размер до 300px и добавили плавный переход
+            v.innerHTML = `
+                <h3>Погладь Микушу!</h3>
+                <div style="margin: 15px 0; display: flex; justify-content: center; align-items: center; min-height: 320px;">
+                    <img id="mikuPetImg" src="miku_zhena_1.png" 
+                         style="width: 300px; height: 300px; object-fit: contain; cursor: grab; user-select: none; transition: transform 0.2s;" 
+                         draggable="false">
+                </div>
+                <div class="progress-container" style="height: 25px;"><div class="progress-bar" id="petBar"></div></div>
+                <p id="petHint" style="font-size: 12px; color: #888; margin-top: 5px;">Нужно больше любви...</p>`;
+            
+            let p = 0; 
+            let lastX = 0;
+            const img = document.getElementById('mikuPetImg');
+            const hint = document.getElementById('petHint');
+            
+            const handler = (e) => {
+                // Работаем только при зажатой кнопке
+                if (e.type.includes('mouse') && e.buttons !== 1) return; 
+                
+                const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                
+                if (lastX) {
+                    const delta = Math.abs(clientX - lastX);
+                    p += delta * 0.15; // Скорость заполнения
+                    
+                    const progressBar = document.getElementById('petBar');
+                    progressBar.style.width = Math.min(p, 100) + '%';
+
+                    // ЛОГИКА СМЕНЫ КАРТИНКИ НА 50%
+                    if (p >= 50 && p < 100) {
+                        img.src = 'miku_zhena_2.png'; // Довольная Мику
+                        hint.textContent = "Ей нравится! Продолжай!";
+                        hint.style.color = "var(--miku-color)";
+                        img.style.transform = "scale(1.05)"; // Легкий зум для эффекта радости
+                    }
+                }
+                
+                lastX = clientX;
+                
+                // ФИНАЛ
+                if (p >= 100) { 
+                    img.removeEventListener('mousemove', handler); 
+                    img.removeEventListener('touchmove', handler);
+                    img.style.transform = "scale(1.1)";
+                    hint.textContent = "Мику в восторге! 🩵";
+                    completeVerification(); 
+                }
+            };
+
+            const stopPetting = () => {
+                lastX = 0;
+                // Если бросил до 50%, возвращаем обычный вид
+                if (p < 50) {
+                    img.src = '2564.png';
+                    img.style.transform = "scale(1)";
+                }
+            };
+
+            img.addEventListener('mousemove', handler);
+            img.addEventListener('touchmove', handler);
+            img.addEventListener('mouseleave', stopPetting);
+            img.addEventListener('mouseup', stopPetting);
+            img.addEventListener('touchend', stopPetting);
+            
+            img.addEventListener('mousedown', () => img.style.cursor = 'grabbing');
+            img.addEventListener('mouseup', () => img.style.cursor = 'grab');
+        },
+        function renderCandy() {
+            const v = document.getElementById('verifySection');
+            // Устанавливаем начальный арт и кнопку
+            v.innerHTML = `
+                <h3>Угости Микушу!</h3>
+                <div style="margin: 15px 0; display: flex; justify-content: center; align-items: center; min-height: 320px;">
+                    <img id="mikuCandyImg" src="miku_candy_1.png" 
+                         style="width: 300px; height: 300px; object-fit: contain; user-select: none; transition: all 0.3s ease;" 
+                         draggable="false">
+                </div>
+                <div id="candyActionBox">
+                    <button id="openHandBtn" style="background: #ff9800; padding: 12px 25px; width: auto; font-size: 18px;">
+                        Открываешь кулачок... 🍬
+                    </button>
+                </div>
+                <p id="candyHint" style="font-size: 13px; color: #888; margin-top: 10px;">В твоей руке что-то вкусное?</p>
+            `;
+
+            const btn = document.getElementById('openHandBtn');
+            const img = document.getElementById('mikuCandyImg');
+            const hint = document.getElementById('candyHint');
+            const actionBox = document.getElementById('candyActionBox');
+
+            btn.onclick = function() {
+                // 1. Меняем арт на довольный
+                img.src = 'miku_candy_2.png';
+                img.style.transform = "scale(1.1)"; // Эффект радости
+                
+                // 2. Скрываем кнопку
+                actionBox.style.display = 'none';
+                
+                // 3. Обновляем текст
+                hint.textContent = "Мику в восторге от угощения! 🩵";
+                hint.style.color = "var(--miku-color)";
+                hint.style.fontWeight = "bold";
+
+                // 4. Засчитываем верификацию через небольшую паузу (800мс), чтобы увидеть арт
+                setTimeout(() => {
+                    completeVerification();
+                }, 1200);
+            };
+        },
+        function renderLeek() {
+            const v = document.getElementById('verifySection');
+            v.innerHTML = `<h3>Заряди луком-пореем!</h3><p style="font-size:12px; margin:0;">Кликай по луку 10 раз</p><button class="leek-btn" id="lBtn">🥬</button><div class="progress-container"><div class="progress-bar" id="lBar"></div></div>`;
+            let clicks = 0;
+            document.getElementById('lBtn').onclick = () => {
+                clicks++; document.getElementById('lBar').style.width = (clicks * 10) + '%';
+                if(clicks >= 10) { document.getElementById('lBtn').disabled = true; completeVerification(); }
+            };
+        },
+        function renderNotes() {
+            const v = document.getElementById('verifySection');
+            v.innerHTML = `<h3>Поймай 3 ноты!</h3><div id="notesArea" style="height:100px; position:relative; width:100%;"></div>`;
+            const area = document.getElementById('notesArea'); let caught = 0;
+            for(let i=0; i<3; i++) {
+                const n = document.createElement('div'); n.className = 'note'; n.textContent = '♪';
+                n.style.left = Math.random() * 80 + '%'; n.style.top = Math.random() * 50 + 'px';
+                n.style.animationDelay = Math.random() * 1 + 's';
+                n.onclick = () => { n.style.display = 'none'; caught++; if(caught === 3) completeVerification(); };
+                area.appendChild(n);
+            }
+        },
+        function renderConfession() {
+            const v = document.getElementById('verifySection');
+            v.innerHTML = `<h3>Признайся в любви</h3><p style="font-size:12px; margin:0;">Введи фразу: Я люблю тебя</p><input type="text" id="confInput" placeholder="Писать сюда..." style="padding:10px;"><button id="confBtn" style="background:#ef6c00;">Сказать</button>`;
+            document.getElementById('confBtn').onclick = () => {
+                const val = document.getElementById('confInput').value.trim().toLowerCase();
+                if (val === 'я люблю тебя') completeVerification();
+                else alert("Мику не услышала тебя! (Фраза неверная)");
+            };
+        }
+    ];
+
+    function showRandomMinigame() {
+        const idx = Math.floor(Math.random() * games.length);
+        games[idx]();
+    }
+
+    // === ЛОГИКА UI И СТАТУСОВ ===
     function updateUI() {
         const user = localStorage.getItem('miku_user');
         const lastV = parseInt(localStorage.getItem('miku_verified') || "0");
@@ -192,13 +366,16 @@
             if (document.getElementById('videoBox').style.display === 'none') showCert(user);
             
             if (now - lastV > TIME_VERIFY) {
-                vSec.style.display = 'block';
-                msg.textContent = "Мику ждет подтверждения!";
-                msg.style.color = "#ef6c00";
+                if (!isMinigameActive) {
+                    isMinigameActive = true;
+                    vSec.style.display = 'block';
+                    showRandomMinigame(); // Рисуем случайную игру
+                }
+                msg.textContent = "Мику ждет твоего внимания!"; msg.style.color = "#ef6c00";
             } else {
+                isMinigameActive = false;
                 vSec.style.display = 'none';
-                msg.textContent = `Вы в браке, ${user} 🩵`;
-                msg.style.color = "var(--miku-dark)";
+                msg.textContent = `Счастливы в браке, ${user} 🩵`; msg.style.color = "var(--miku-dark)";
             }
         }
     }
@@ -207,32 +384,20 @@
         try {
             const q = query(collection(db, "marriages"), orderBy("created", "asc"));
             const snap = await getDocs(q);
-            const now = Date.now();
-            const today = new Date().toLocaleDateString('ru-RU');
-            let cT = 0, cAll = 0, cD = 0;
-            const cData = {};
+            const now = Date.now(); const today = new Date().toLocaleDateString('ru-RU');
+            let cT = 0, cAll = 0, cD = 0; const cData = {};
 
             for (const d of snap.docs) {
-                const data = d.data();
-                let s = data.status;
-
+                const data = d.data(); let s = data.status;
                 if (s === 'married' && (now - data.last_verified > TIME_DIVORCE)) {
                     await updateDoc(doc(db, "marriages", d.id), { status: 'divorced' });
                     s = 'divorced';
-                    if (data.username === localStorage.getItem('miku_user')) {
-                        localStorage.clear(); location.reload();
-                    }
+                    if (data.username === localStorage.getItem('miku_user')) { localStorage.clear(); location.reload(); }
                 }
-
                 const day = new Date(data.created).toLocaleDateString('ru-RU');
-                if (s === 'married') {
-                    cAll++; if (day === today) cT++;
-                    cData[day] = (cData[day] || 0) + 1;
-                } else { cD++; }
+                if (s === 'married') { cAll++; if (day === today) cT++; cData[day] = (cData[day] || 0) + 1; } else { cD++; }
             }
-            document.getElementById('sToday').textContent = cT;
-            document.getElementById('sTotal').textContent = cAll;
-            document.getElementById('sDiv').textContent = cD;
+            document.getElementById('sToday').textContent = cT; document.getElementById('sTotal').textContent = cAll; document.getElementById('sDiv').textContent = cD;
             renderChart(cData);
         } catch (e) { console.error(e); }
     }
@@ -240,95 +405,51 @@
     function renderChart(data) {
         const labels = Object.keys(data); const values = labels.map(l => data[l]);
         if (myChart) myChart.destroy();
-        myChart = new Chart(document.getElementById('mikuChart'), {
-            type: 'line',
-            data: { labels, datasets: [{ label: 'Браки', data: values, borderColor: '#39C5BB', tension: 0.4, fill: true, backgroundColor: 'rgba(57,197,187,0.1)' }] },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
+        myChart = new Chart(document.getElementById('mikuChart'), { type: 'line', data: { labels, datasets: [{ label: 'Браки', data: values, borderColor: '#39C5BB', tension: 0.4, fill: true, backgroundColor: 'rgba(57,197,187,0.1)' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
 
-    // РЕГИСТРАЦИЯ С БЛОКОМ ПОВТОРОВ
+    // === ФОРМЫ РЕГИСТРАЦИИ И ВХОДА ===
     document.getElementById('marryForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const u = document.getElementById('username').value.trim();
-        
-        // ПРОВЕРЯЕМ НИК ВООБЩЕ ВЕЗДЕ
+        e.preventDefault(); const u = document.getElementById('username').value.trim();
         const q = query(collection(db, "marriages"), where("username", "==", u));
         const snap = await getDocs(q);
-        
         if (!snap.empty) {
             const data = snap.docs[0].data();
-            if (data.status === 'married') {
-                alert("Ник уже занят активным мужем!");
-            } else if (data.restorations >= 1) {
-                alert("Этот ник аннулирован навсегда из-за нарушения верности.");
-            } else {
-                alert("Этот ник уже был зарегистрирован. Используйте 'Вход' для восстановления.");
-            }
+            if (data.status === 'married') { alert("Ник уже занят активным мужем!"); } 
+            else if (data.restorations >= 1) { alert("Этот ник аннулирован навсегда из-за нарушения верности."); } 
+            else { alert("Этот ник уже был зарегистрирован. Используйте 'Вход' для восстановления."); }
             return;
         }
-
         const now = Date.now();
-        await addDoc(collection(db, "marriages"), { 
-            username: u, created: now, last_verified: now, status: 'married', restorations: 0 
-        });
-        localStorage.setItem('miku_user', u);
-        localStorage.setItem('miku_verified', now);
+        await addDoc(collection(db, "marriages"), { username: u, created: now, last_verified: now, status: 'married', restorations: 0 });
+        localStorage.setItem('miku_user', u); localStorage.setItem('miku_verified', now);
         
-        document.getElementById('marryForm').style.display = 'none';
-        document.getElementById('loginArea').style.display = 'none';
-        document.getElementById('mediaArea').style.display = 'block';
-        document.getElementById('videoBox').style.display = 'block';
+        document.getElementById('marryForm').style.display = 'none'; document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('mediaArea').style.display = 'block'; document.getElementById('videoBox').style.display = 'block';
         const v = document.getElementById('mikuVideo');
-        v.play().catch(() => showCert(u));
-        v.onended = () => showCert(u);
+        v.play().catch(() => showCert(u)); v.onended = () => showCert(u);
         updateUI(); sync();
     };
 
-    // ВХОД / ВОССТАНОВЛЕНИЕ (1 шанс)
     document.getElementById('loginBtn').onclick = async () => {
         const u = document.getElementById('loginNick').value.trim();
         const q = query(collection(db, "marriages"), where("username", "==", u));
         const snap = await getDocs(q);
-
         if (snap.empty) { alert("Ник не зарегистрирован!"); return; }
-
-        const userDoc = snap.docs[0];
-        const data = userDoc.data();
-
+        const userDoc = snap.docs[0]; const data = userDoc.data();
         if (data.status === 'married') {
-            localStorage.setItem('miku_user', u);
-            localStorage.setItem('miku_verified', data.last_verified);
-            updateUI();
+            localStorage.setItem('miku_user', u); localStorage.setItem('miku_verified', data.last_verified); updateUI();
         } else {
             if ((data.restorations || 0) < 1) {
                 const now = Date.now();
-                await updateDoc(doc(db, "marriages", userDoc.id), { 
-                    status: 'married', last_verified: now, restorations: 1 
-                });
-                localStorage.setItem('miku_user', u);
-                localStorage.setItem('miku_verified', now);
-                alert("Шанс использован. Теперь будьте внимательны!");
-                updateUI(); sync();
-            } else {
-                alert("Лимит восстановлений исчерпан. Ник заблокирован навсегда.");
-            }
+                await updateDoc(doc(db, "marriages", userDoc.id), { status: 'married', last_verified: now, restorations: 1 });
+                localStorage.setItem('miku_user', u); localStorage.setItem('miku_verified', now);
+                alert("Шанс использован. Теперь будьте внимательны!"); updateUI(); sync();
+            } else { alert("Лимит восстановлений исчерпан. Ник заблокирован навсегда."); }
         }
     };
 
-    document.getElementById('verifyBtn').onclick = async () => {
-        const u = localStorage.getItem('miku_user');
-        const q = query(collection(db, "marriages"), where("username", "==", u), where("status", "==", "married"));
-        const snap = await getDocs(q);
-        if (!snap.empty) {
-            const now = Date.now();
-            await updateDoc(doc(db, "marriages", snap.docs[0].id), { last_verified: now });
-            localStorage.setItem('miku_verified', now);
-            updateUI(); sync();
-        }
-    };
-
-    setInterval(updateUI, 10000);
+    setInterval(updateUI, 10000); // Таймер теперь не будет сбрасывать активную игру
     updateUI(); sync();
 </script>
 </body>
